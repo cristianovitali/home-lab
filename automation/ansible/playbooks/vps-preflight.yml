@@ -1,0 +1,36 @@
+---
+# Read-only. TARGET: each external VPS through the private management channel.
+- name: External VPS backup prerequisites
+  hosts: vps
+  gather_facts: false
+  become: true
+  serial: 1
+  vars:
+    vps_backup_script: /usr/local/sbin/backup-to-pbs
+  tasks:
+    - name: Provide actionable diagnostic context if this host requires a reboot
+      ansible.builtin.include_tasks: ../tasks/reboot-notification-context.yml
+
+    - name: Check backup wrapper exists and is executable
+      ansible.builtin.stat:
+        path: "{{ vps_backup_script }}"
+      register: vps_wrapper
+
+    - name: Require a deliberate local backup wrapper installation
+      ansible.builtin.assert:
+        that:
+          - vps_wrapper.stat.exists
+          - vps_wrapper.stat.executable
+        fail_msg: >-
+          Backup wrapper missing. This public example intentionally does
+          not install the production backup script or credentials.
+
+    - name: Gather available service information
+      ansible.builtin.service_facts:
+
+    - name: Report Docker service state where present
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} Docker state: {{
+          ansible_facts.services.get('docker.service', {}).get('state', 'not listed') }};
+          backup wrapper exists (contents intentionally not read).

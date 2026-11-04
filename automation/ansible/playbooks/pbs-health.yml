@@ -1,0 +1,49 @@
+---
+# Read-only. TARGET: Proxmox Backup Server (not a PVE compute node).
+- name: PBS operational preflight
+  hosts: pbs
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Provide actionable diagnostic context if this host requires a reboot
+      ansible.builtin.include_tasks: ../tasks/reboot-notification-context.yml
+
+    - name: Gather PBS system service states
+      ansible.builtin.service_facts:
+
+    - name: Confirm PBS API proxy service is present
+      ansible.builtin.assert:
+        that:
+          - "'proxmox-backup-proxy.service' in ansible_facts.services"
+          - "ansible_facts.services['proxmox-backup-proxy.service'].state == 'running'"
+
+    - name: Request PBS task list without exposing task output
+      ansible.builtin.command:
+        argv:
+          - proxmox-backup-manager
+          - task
+          - list
+          - --output-format
+          - json
+      register: pbs_tasks
+      changed_when: false
+      check_mode: false
+      no_log: true
+
+    - name: Verify PBS datastore CLI access
+      ansible.builtin.command:
+        argv:
+          - proxmox-backup-manager
+          - datastore
+          - list
+      register: pbs_datastores
+      changed_when: false
+      check_mode: false
+      no_log: true
+
+    - name: Report checks without private datastore metadata
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }}: PBS service healthy;
+          task list returned {{ pbs_tasks.rc }};
+          datastore list returned {{ pbs_datastores.rc }}.

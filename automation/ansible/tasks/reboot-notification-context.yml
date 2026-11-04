@@ -1,0 +1,38 @@
+---
+# Reference-only diagnostic context for actionable reboot notifications.
+# Included by all reference playbooks. Read-only; does not send messages or restart hosts.
+- name: Check whether the host requests a reboot
+  ansible.builtin.stat:
+    path: /run/reboot-required
+  register: homelab_reboot_flag
+
+- name: Check for packages associated with the reboot request
+  ansible.builtin.stat:
+    path: /run/reboot-required.pkgs
+  register: homelab_reboot_packages_file
+  when: homelab_reboot_flag.stat.exists
+
+- name: Read associated package names
+  ansible.builtin.slurp:
+    src: /run/reboot-required.pkgs
+  register: homelab_reboot_packages_raw
+  when:
+    - homelab_reboot_flag.stat.exists
+    - homelab_reboot_packages_file.stat.exists
+
+- name: Report reboot requirement with host identification and next action
+  ansible.builtin.debug:
+    msg:
+      event: reboot_required
+      priority: informational
+      host: "{{ ansible_facts.hostname | default(inventory_hostname) }}"
+      inventory_host: "{{ inventory_hostname }}"
+      ip: 'not included in public reference output (see private inventory)'
+      reason: >-
+        The operating system reports that a reboot is required after package changes.
+        The package list is diagnostic context, not necessarily the complete root cause.
+      related_packages: "{{ (homelab_reboot_packages_raw.content | default('') | b64decode).splitlines() }}"
+      impact: "Services on this host will be interrupted during the reboot; assess dependencies first."
+      action: "Review the package list, confirm maintenance window and host dependencies, then plan a controlled reboot."
+      automatic_reboot: false
+  when: homelab_reboot_flag.stat.exists

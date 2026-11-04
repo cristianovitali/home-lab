@@ -1,0 +1,66 @@
+---
+# Read-only. TARGET: the dedicated Nextcloud VM, not PBS or a NAS shell.
+- name: Nextcloud application and data-disk health
+  hosts: nextcloud
+  gather_facts: false
+  become: true
+  vars:
+    nextcloud_data_dir: /srv/nextcloud-data  # EXAMPLE; set your own mount
+    nextcloud_occ_path: /var/www/nextcloud/occ
+  tasks:
+    - name: Provide actionable diagnostic context if this host requires a reboot
+      ansible.builtin.include_tasks: ../tasks/reboot-notification-context.yml
+
+    - name: Check data mount is present
+      ansible.builtin.command:
+        argv:
+          - findmnt
+          - --mountpoint
+          - "{{ nextcloud_data_dir }}"
+      register: nc_mount
+      changed_when: false
+      check_mode: false
+
+    - name: Check Nextcloud marker in actual data-directory root
+      ansible.builtin.stat:
+        path: "{{ nextcloud_data_dir }}/.ncdata"
+      register: nc_marker
+
+    - name: Require application data marker
+      ansible.builtin.assert:
+        that:
+          - nc_marker.stat.exists
+          - nc_marker.stat.isreg
+        fail_msg: Data marker not found; confirm data-directory and mount before proceeding.
+
+    - name: Collect service states
+      ansible.builtin.service_facts:
+
+    - name: Require core services to be running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['apache2.service'].state == 'running'
+          - ansible_facts.services['postgresql.service'].state == 'running'
+          - ansible_facts.services['cron.service'].state == 'running'
+        fail_msg: A core service is missing or not running.
+
+    - name: Read application status through its service account
+      ansible.builtin.command:
+        argv:
+          - runuser
+          - -u
+          - www-data
+          - --
+          - php
+          - "{{ nextcloud_occ_path }}"
+          - status
+      register: nc_occ
+      changed_when: false
+      check_mode: false
+      no_log: true
+
+    - name: Report overall results without application details
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }}: data mount present; data marker present;
+          Apache/PostgreSQL/cron running; Nextcloud occ exit code {{ nc_occ.rc }}.

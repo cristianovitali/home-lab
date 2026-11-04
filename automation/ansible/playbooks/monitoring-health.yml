@@ -1,0 +1,26 @@
+---
+# Read-only. TARGET: dedicated Zabbix monitoring VM.
+- name: Zabbix service preflight
+  hosts: monitoring
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Provide actionable diagnostic context if this host requires a reboot
+      ansible.builtin.include_tasks: ../tasks/reboot-notification-context.yml
+
+    - name: Collect monitoring host service states
+      ansible.builtin.service_facts:
+
+    - name: Require Zabbix server, PostgreSQL, and Nginx services
+      ansible.builtin.assert:
+        that:
+          - "ansible_facts.services['zabbix-server.service'].state == 'running'"
+          - "ansible_facts.services['postgresql.service'].state == 'running'"
+          - "ansible_facts.services['nginx.service'].state == 'running'"
+        fail_msg: One or more core monitoring services are not running.
+
+    - name: Report safe service summary
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }}: Zabbix server, PostgreSQL, Nginx are running.
+          PHP-FPM and HTTP scenario checks must be validated separately.

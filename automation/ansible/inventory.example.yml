@@ -1,0 +1,20 @@
+---
+# Replace inventory targets privately. Never commit a populated inventory.
+all:
+  children:
+    monitoring:
+      hosts:
+        monitoring-example:
+          ansible_host: REPLACE_WITH_PRIVATE_ADDRESS
+    nextcloud:
+      hosts:
+        nextcloud-example:
+          ansible_host: REPLACE_WITH_PRIVATE_ADDRESS
+    pbs:
+      hosts:
+        backup-example:
+          ansible_host: REPLACE_WITH_PRIVATE_ADDRESS
+    vps:
+      hosts:
+        remote-example:
+          ansible_host: REPLACE_WITH_PRIVATE_ADDRESS
