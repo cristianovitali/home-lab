@@ -39,17 +39,30 @@ A high-level, sanitized system diagram, architectural trade-offs, data-protectio
 
 ## Current state
 
-The core infrastructure and primary self-hosted services are operational. Proxmox API monitoring, system/ICMP checks, and HTTP health checks are being rolled out through Zabbix. Backup workflows are in use; **full end-to-end restore evidence, some replication validation, and deeper hardware/storage alerting remain ongoing work**.
+The core infrastructure and primary self-hosted services are operational. Zabbix monitoring now covers **18 verified ICMP targets**, **six already configured application web scenarios**, and a **Ceph API template with 11 of 11 items collecting successfully** at the last validation. API/SNMP monitoring is in place for backup and storage systems. Backup workflows are in use; **alert routing, selected DNS/TLS monitoring, full end-to-end restores, some replication validation, and deeper hardware/storage alerting remain ongoing work**.
 
 This is a living operational environment. The architecture document distinguishes deployed capabilities from validations that are still pending.
+
+## Public documentation and reusable automation
+
+- [Project roadmap and priorities](docs/roadmap.md)
+- [Monitoring coverage and alerting approach](docs/monitoring-and-alerting.md)
+- [Validation status and evidence levels](docs/validation-status.md)
+- [ADR: Layered monitoring](docs/adr/0001-layered-monitoring.md)
+- [ADR: Recovery-first protection](docs/adr/0002-backup-and-restore.md)
+- [Runbook: Backup failure triage](docs/runbooks/backup-failure-triage.md)
+- [Runbook: Power-event recovery](docs/runbooks/power-event-recovery.md)
+- [Ansible reference playbooks](automation/ansible/README.md) — six reviewed examples, sample inventory and reboot diagnostic task
+- [Sanitized Python operational scripts](automation/scripts/README.md) — systemd failure and reboot-required reports
 
 ## Documentation roadmap
 
 - [x] Sanitized architecture overview and design trade-offs
-- [ ] Public runbooks with secrets and private environment details removed
-- [ ] Backup/restore test reports with results and recovery times
-- [ ] Monitoring dashboards and alert design
-- [ ] Architecture decision records and selected reusable automation
+- [x] Public runbooks for selected safe operational workflows
+- [x] Architecture decision records and initial reusable automation
+- [x] Monitoring status and alert design (deployment of advanced alerts in progress)
+- [ ] Backup/restore test reports with measured results and recovery times
+- [ ] Sanitized monitoring dashboards and visual infrastructure diagrams
 
 ## Responsible publication
 
@@ -58,4 +71,4 @@ This portfolio intentionally excludes live endpoints, public IPs, internal addre
 The work uses AI-assisted research, drafting, and troubleshooting as engineering support. Requirements, design decisions, execution, and verification remain under the project maintainer's control.
 ## License
 
-Original documentation and architecture diagrams in this repository are provided under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE) license. Reuse and adaptation are welcome with appropriate attribution and indication of changes. Third-party names, trademarks and any independently licensed assets remain subject to their respective rights. Any source code published later will carry its own explicit software license.
+Original documentation and architecture diagrams in this repository are provided under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE) license. Reuse and adaptation are welcome with appropriate attribution and indication of changes. Third-party names, trademarks and any independently licensed assets remain subject to their respective rights. Public automation and code examples are distributed under the [MIT License](automation/LICENSE), separately from the CC BY 4.0 documentation license.
