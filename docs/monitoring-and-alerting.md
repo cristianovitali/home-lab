@@ -1,6 +1,6 @@
 # Layered monitoring and alerting
 
-Updated: **4 November 2026** — public, sanitized overview.
+Updated: **5 November 2026** — public, sanitized overview.
 
 ## Design
 
@@ -15,7 +15,7 @@ Zabbix 7.0 LTS is the central monitoring system. Collection techniques are chose
 | NAS and ZFS infrastructure | SNMPv3 templates | Three NAS nodes of one type and another NAS node configured; early checks observed no unsupported items on the three-node subset |
 | Proxmox Backup Server | HTTP API template and monitored jobs | API integration and datastore status accessible; selected alerts and freshness checks require follow-through |
 | Certificates and DNS | Prepared Agent 2 items / split-horizon probes | Designed and privately staged; **not imported** into production yet |
-| Alert delivery | Existing local job notifications plus planned Zabbix media/actions | Existing script-based notifications vary by service; complete Zabbix routing and recovery delivery not verified |
+| Alert delivery | Existing job notifications plus Zabbix email and push webhook | Direct email test received, email trigger action saved; direct push webhook test received, but its filtered trigger action and recipient linkage are not yet configured. No real-trigger delivery evidence yet |
 
 ## Service health versus host reachability
 
@@ -41,4 +41,4 @@ All six application hosts had their three ICMP checks supported and returned UP.
 
 ## Next steps
 
-Import and validate DNS and TLS checks; then review existing trigger and notification actions to avoid duplicates. After alert routing, validate recipient-side delivery and recovery messages. Finally add service levels and dashboard panels using measured application health.
+Complete recipient/filtered-action configuration for critical push alerts without changing the existing email action; validate real-trigger delivery and recovery messages without causing production outages. Separately, import and validate DNS/TLS monitoring templates. A NAS alternative DNS resolver is being configured, but its independent local-zone answers and compatibility with domain-based VPN policy routing require testing before it becomes a client DNS option. See [DNS resilience design](local-dns-resilience.md). Finally add service levels and dashboards using measured application health.
