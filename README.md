@@ -39,7 +39,7 @@ A high-level, sanitized system diagram, architectural trade-offs, data-protectio
 
 ## Current state
 
-The core infrastructure and primary self-hosted services are operational. Zabbix monitoring now covers **18 verified ICMP targets**, **six already configured application web scenarios**, and a **Ceph API template with 11 of 11 items collecting successfully** at the last validation. API/SNMP monitoring is in place for backup and storage systems. Backup workflows are in use; **alert routing, selected DNS/TLS monitoring, full end-to-end restores, some replication validation, and deeper hardware/storage alerting remain ongoing work**.
+The core infrastructure and primary self-hosted services are operational. Zabbix monitoring now covers **18 verified ICMP targets**, **six already configured application web scenarios**, and a **Ceph API template with 11 of 11 items collecting successfully** at the last validation. API/SNMP monitoring is in place for backup and storage systems. Backup workflows are in use. **A direct email test and a direct push-webhook test succeeded**, and a Zabbix email trigger action has been saved; **alert delivery from a real trigger has not yet been verified**, and the push route still needs recipient/action configuration. Secondary local DNS configuration has begun on an existing NAS; DNS zone population, synchronization, policy-routing tests, DHCP changes and outage validation remain pending. Full end-to-end restores, some replication validation and deeper hardware/storage alerting are also ongoing.
 
 This is a living operational environment. The architecture document distinguishes deployed capabilities from validations that are still pending.
 
@@ -47,6 +47,7 @@ This is a living operational environment. The architecture document distinguishe
 
 - [Project roadmap and priorities](docs/roadmap.md)
 - [Monitoring coverage and alerting approach](docs/monitoring-and-alerting.md)
+- [Local DNS resilience and DHCP trade-offs](docs/local-dns-resilience.md) — configuration started; client cutover and failover are not claimed
 - [Validation status and evidence levels](docs/validation-status.md)
 - [ADR: Layered monitoring](docs/adr/0001-layered-monitoring.md)
 - [ADR: Recovery-first protection](docs/adr/0002-backup-and-restore.md)
