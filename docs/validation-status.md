@@ -1,6 +1,6 @@
 # Public validation log
 
-Updated: **4 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
+Updated: **5 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
 
 | Area | Current claim | Verification level |
 |---|---|---|
@@ -12,7 +12,10 @@ Updated: **4 November 2026**. Public evidence is summarized rather than posting 
 | Backup Server API | Authenticated data retrieval and monitoring template integration | **Functional API path**, per-job alert and restore evidence separate |
 | Backups and replication | Automated jobs and monitoring mechanisms in place | **Configured/selected success logs**, not universal restore validation |
 | DNS/TLS additional templates | Prepared privately for later deployment | **Not deployed** |
-| Zabbix ntfy media and actions | Draft media type and action plan prepared privately | **Not deployed/tested** |
+| Zabbix email transport and action | Media enabled; direct email test reached recipient; email trigger action saved | **Transport tested / action configured**, real event and recovery delivery outstanding |
+| Zabbix push webhook and action | Media enabled and direct webhook test reached recipient; secret reference configured; critical-only action and recipient linkage pending | **Transport tested**, automatic alerting not deployed |
+| Alternate local DNS resolver | NAS DNS service installed with gateway-only forwarding; local authoritative zone and synchronization incomplete | **Partial configuration**, resilience not tested |
+| Parallel DHCP option | Separate address pools proposed; no client DHCP changes | **Design only** |
 | Disaster recovery | Runbooks and backup copies available | **Recovery exercise outstanding** |
 
 ## Evidence conventions
