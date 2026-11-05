@@ -124,6 +124,8 @@ The private gateway is based on OpenWrt. Authorized external traffic reaches sel
 
 The boundary is designed around limiting exposed application surfaces and avoiding direct public exposure of core management protocols. Provider connectivity, certificates, name resolution, and VPN routing remain separate health checks and recovery dependencies.
 
+**Local name-resolution resilience is now in partial configuration.** A DNS service on the existing NAS has been installed, with external queries deliberately forwarded only through the main gateway. A separately held local zone is not yet populated or synchronized, and no second DNS has been distributed to clients. The project must validate domain-based VPN policy routing and DNS caching interactions before doing so. DHCP redundancy is a future design, not a deployed HA service. The gateway remains a critical router and storage/startup dependency; an alternate DNS resolver alone cannot restore connectivity. See the [public design note](local-dns-resilience.md).
+
 ## 4. Service placement and purpose
 
 | Service / category | Function | Operational dependency |
@@ -200,12 +202,12 @@ The central monitoring platform is **Zabbix 7.0 LTS** on a dedicated Linux virtu
 |---|---|---|
 | Monitoring server itself | Zabbix Agent 2 + server health template | Operational |
 | Hypervisors, NAS, backup server, gateway, wireless devices | ICMP reachability and response time | Baseline configured |
-| Proxmox virtualization | Read-only HTTP API template | Configured for independent host; cluster integration being extended |
+| Proxmox virtualization | Read-only HTTP API template | Configured across relevant systems; one API-availability anomaly remains under separate review |
 | Web applications | HTTP scenarios, expected status/body checks, Zabbix triggers | Baseline checks configured for principal applications |
-| Ceph health | Cluster / pool / OSD status | Deeper integration planned |
+| Ceph health | Cluster API and derived MON/OSD/PG health metrics | 11/11 item collection verified; nine triggers configured, failure/recovery delivery not yet tested |
 | TrueNAS and disk health | Pool, disk/SMART, temperature, utilization | Deeper integration planned |
 | PBS backup success | Datastore health, jobs, verification and restore evidence | Deeper integration planned |
-| VPN and external ingress | Tunnel, DNS, reverse proxy and certificate checks | Planned expansion |
+| VPN and external ingress | Tunnel, DNS, reverse proxy and certificate checks | Planned expansion; local DNS resilience configuration underway separately |
 
 An HTTP `200` confirms the endpoint is responding, **not necessarily** that a complete user workflow is healthy. The intended direction is progressively more meaningful checks and actionable alerts, avoiding noisy alerts for intentionally powered-off systems.
 
@@ -246,8 +248,8 @@ Planned runbooks cover cluster/node restart, NAS storage disconnect and remount,
 | PBS VM/CT and selected Linux host backup workflows | In use; source coverage and scheduling continue to be reviewed |
 | ZFS replication / secondary backup protection | Selective implementation and validation in progress |
 | Full isolated restore exercises, recorded RTO/RPO | Pending documented verification |
-| Zabbix reachability and application checks | First monitoring layer in place |
-| Hardware SMART, Ceph, PBS and storage-specific alerting | Next monitoring phase |
+| Zabbix reachability and application checks | ICMP and six application scenarios configured; Ceph 11/11 items verified; end-to-end notification evidence pending |
+| Hardware SMART, PBS and additional storage-specific alerting | Next monitoring phase; baseline Ceph health metrics already collecting |
 
 **This distinction is intentional.** A technical portfolio is more valuable when it states what has been tested, what has merely been deployed, and what remains a hypothesis.
 
