@@ -1,6 +1,6 @@
 # Public engineering roadmap
 
-Updated: **4 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
+Updated: **5 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
 
 ## Completed and evidenced
 
@@ -15,7 +15,7 @@ Updated: **4 November 2026**. This is a **sanitized engineering roadmap** for a 
 ## In progress / next
 
 1. **Alert quality and delivery:** finish Zabbix action routing, an ntfy integration, trigger dependencies, and notification recovery behavior. Validate delivery without disturbing production or deliberately failing backups.
-2. **DNS and TLS health checks:** import and validate prepared monitoring templates for internal resolution and certificate expiry. Prepared privately, **not yet deployed**.
+2. **DNS resilience and TLS checks:** a native DNS service on an existing NAS is installed and forwards exclusively through the primary gateway; the local authoritative zone, record synchronization, split-horizon validation and safe client distribution are **not yet complete**. Additional DNS/TLS monitoring templates are privately staged but **not yet deployed**. See the [DNS resilience design note](local-dns-resilience.md).
 3. **Backup freshness and storage diagnostics:** verify PBS job results and datastore health, ZFS pool alerts, SMART temperatures, and stale replication detection. Keep existing job notifications intact.
 4. **Failure dependency model:** suppress derivative application incidents when an upstream network, DNS, storage or virtualization dependency is unavailable.
 5. **Monitoring service levels:** define application-level availability objectives and measure rolling historical periods; distinguish reachable host, correct HTTP response and verified application transaction.
@@ -31,7 +31,7 @@ Updated: **4 November 2026**. This is a **sanitized engineering roadmap** for a 
 
 ## Research backlog (not deployed)
 
-- Secondary DNS architecture and failover.
+- A possible second DHCP service with separate address pools, after DNS and domain-based VPN routing validation.
 - Additional security telemetry such as host intrusion monitoring.
 - Improved Home Assistant controls, IoT integrations and emergency VPS management.
 - Codec modernization and media-library quality reporting.
