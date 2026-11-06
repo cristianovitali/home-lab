@@ -11,13 +11,13 @@ Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a 
 - **Ceph observations:** one cluster-wide API collector and ten dependent items; 11 of 11 items supported in the last check, with nine configured alert triggers. Monitoring has been verified to collect data, but deliberate failure injection has not been performed.
 - **Storage monitoring:** SNMPv3 integrations for three TrueNAS servers and one Synology NAS; API-based Proxmox and PBS monitoring. Some individual storage metrics remain to be validated.
 - **Documentation-as-code:** a separate private operational repository plus this sanitized public engineering portfolio; initial read-only Ansible playbooks and reusable notification patterns published.
-- **Per-host hardware inventory started:** CPU/RAM/storage/network fields recorded with evidence levels, including a two-drive NAS replacement for which resilver completion is still pending. [Hardware methodology and field note](hardware-inventory.md).
+- **Per-host hardware inventory started:** CPU/RAM/storage/network fields recorded with evidence levels; the dedicated backup server's hardware and separate local rescue eMMC are now confirmed. Two-drive NAS replacement resilver completion is still pending. [Hardware methodology and field note](hardware-inventory.md).
 
 ## In progress / next
 
 1. **Alert quality and delivery:** finish Zabbix action routing, an ntfy integration, trigger dependencies, and notification recovery behavior. Validate delivery without disturbing production or deliberately failing backups.
-2. **DNS resilience and TLS checks:** a native DNS service on an existing NAS is installed and forwards exclusively through the primary gateway; the local authoritative zone, record synchronization, split-horizon validation and safe client distribution are **not yet complete**. Additional DNS/TLS monitoring templates are privately staged but **not yet deployed**. See the [DNS resilience design note](local-dns-resilience.md).
-3. **Backup freshness and storage diagnostics:** verify PBS job results and datastore health, ZFS pool alerts, SMART temperatures, and stale replication detection. Keep existing job notifications intact.
+2. **DNS resilience and TLS checks:** a native DNS service on an existing NAS is installed and routes non-local lookups through the primary gateway only. An authoritative internal zone and one record have been **directly verified** after correcting zone NS configuration. Full static record synchronization, an additional service-name zone, split-horizon validation and safe client distribution are **not yet complete**. A guarded scheduled synchronization implementation exists privately but **is not installed**. DNS/TLS monitoring templates remain privately staged, not deployed. See the [DNS resilience design note](local-dns-resilience.md).
+3. **Backup freshness and storage diagnostics:** verify PBS job results and datastore health, ZFS pool alerts, SMART temperatures, and stale replication detection. On the low-power PBS host, prepare periodic configuration rescue archives on the newly initialized secondary flash device; the storage is mounted but no new archive job is active. Keep existing job notifications intact.
 4. **Failure dependency model:** suppress derivative application incidents when an upstream network, DNS, storage or virtualization dependency is unavailable.
 5. **Monitoring service levels:** define application-level availability objectives and measure rolling historical periods; distinguish reachable host, correct HTTP response and verified application transaction.
 6. **Operational dashboards:** aggregate meaningful network, backup, cluster, and application states while avoiding noisy or misleading green statuses.
@@ -32,7 +32,7 @@ Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a 
 
 ## Research backlog (not deployed)
 
-- A possible second DHCP service with separate address pools, after DNS and domain-based VPN routing validation.
+- The agreed second active DHCP service with a non-overlapping address pool; not yet enabled. Validate lease allocations, advertised DNS/router options and domain-based VPN routing before activation.
 - Additional security telemetry such as host intrusion monitoring.
 - Improved Home Assistant controls, IoT integrations and emergency VPS management.
 - Codec modernization and media-library quality reporting.
