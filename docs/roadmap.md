@@ -16,7 +16,7 @@ Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a 
 ## In progress / next
 
 1. **Alert quality and delivery:** real Zabbix email alerts for host DOWN/UP and degraded storage pool were received during actual disk replacement on 6 November (**problem/recovery email delivery validated for those events**). Finish the separate critical-only ntfy route, trigger dependencies and broader coverage; do not disturb the working email action or deliberately fail backups.
-2. **DNS resilience and TLS checks:** a native DNS service on an existing NAS is installed and routes non-local lookups through the primary gateway only. An authoritative internal zone and one record have been **directly verified** after correcting zone NS configuration. Full static record synchronization, an additional service-name zone, split-horizon validation and safe client distribution are **not yet complete**. A guarded scheduled synchronization implementation exists privately but **is not installed**. DNS/TLS monitoring templates remain privately staged, not deployed. See the [DNS resilience design note](local-dns-resilience.md).
+2. **DNS resilience and TLS checks:** two NAS authoritative zones hold 33 static A mappings; an authenticated apply verified 32 updates and the repeat dry-run showed zero changes. A daily systemd sync timer is enabled. Two DHCPv4 pools are active and disjoint; a Windows gateway-leased client confirmed advertisement of both DNS resolvers. Direct DNS queries and a domain-routing nftset smoke test succeeded. **Pending:** first NAS DHCP lease, unattended timer confirmation, DNS cache/PBR restart behavior, gateway outage test and staged DNS/TLS monitoring templates. See [DNS resilience](local-dns-resilience.md).
 3. **Backup freshness and storage diagnostics:** verify PBS job results and datastore health, ZFS pool alerts, SMART temperatures, and stale replication detection. On the low-power PBS host, prepare periodic configuration rescue archives on the newly initialized secondary flash device; the storage is mounted but no new archive job is active. Keep existing job notifications intact.
 4. **Failure dependency model:** suppress derivative application incidents when an upstream network, DNS, storage or virtualization dependency is unavailable.
 5. **Monitoring service levels:** define application-level availability objectives and measure rolling historical periods; distinguish reachable host, correct HTTP response and verified application transaction.
@@ -32,7 +32,7 @@ Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a 
 
 ## Research backlog (not deployed)
 
-- The agreed second active DHCP service with a non-overlapping address pool; not yet enabled. Validate lease allocations, advertised DNS/router options and domain-based VPN routing before activation.
+- Observe a client lease actually issued by the enabled NAS DHCP server; check gateway/DNS parameters, resolve potential powered-off static-IP conflicts, and validate DNS/PBR cache and gateway outage behavior.
 - Additional security telemetry such as host intrusion monitoring.
 - Improved Home Assistant controls, IoT integrations and emergency VPS management.
 - Codec modernization and media-library quality reporting.
