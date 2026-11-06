@@ -47,6 +47,7 @@ This is a living operational environment. The architecture document distinguishe
 
 - [Project roadmap and priorities](docs/roadmap.md)
 - [Monitoring coverage and alerting approach](docs/monitoring-and-alerting.md)
+- [Hardware inventory and disk-replacement recovery case](docs/hardware-inventory.md) — anonymized inventory methodology and observed, unfinished resilver
 - [Local DNS resilience and DHCP trade-offs](docs/local-dns-resilience.md) — configuration started; client cutover and failover are not claimed
 - [Validation status and evidence levels](docs/validation-status.md)
 - [ADR: Layered monitoring](docs/adr/0001-layered-monitoring.md)
