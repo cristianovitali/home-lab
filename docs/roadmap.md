@@ -1,6 +1,6 @@
 # Public engineering roadmap
 
-Updated: **5 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
+Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
 
 ## Completed and evidenced
 
@@ -11,6 +11,7 @@ Updated: **5 November 2026**. This is a **sanitized engineering roadmap** for a 
 - **Ceph observations:** one cluster-wide API collector and ten dependent items; 11 of 11 items supported in the last check, with nine configured alert triggers. Monitoring has been verified to collect data, but deliberate failure injection has not been performed.
 - **Storage monitoring:** SNMPv3 integrations for three TrueNAS servers and one Synology NAS; API-based Proxmox and PBS monitoring. Some individual storage metrics remain to be validated.
 - **Documentation-as-code:** a separate private operational repository plus this sanitized public engineering portfolio; initial read-only Ansible playbooks and reusable notification patterns published.
+- **Per-host hardware inventory started:** CPU/RAM/storage/network fields recorded with evidence levels, including a two-drive NAS replacement for which resilver completion is still pending. [Hardware methodology and field note](hardware-inventory.md).
 
 ## In progress / next
 
