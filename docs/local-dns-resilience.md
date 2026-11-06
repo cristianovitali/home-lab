@@ -1,56 +1,44 @@
-# Local DNS and DHCP resilience — implementation status
+# Local DNS and DHCP resilience — implementation and validation
 
-**Updated:** 6 November 2026. **Evidence:** operator-supplied configuration and direct DNS query results. **Client rollout:** not performed.
+**Updated:** 6 November 2026. **Evidence:** operator terminal output, NAS configuration screenshots, and a Windows DHCP client. This public engineering note intentionally excludes production addresses, DNS names, device identities and credentials.
 
-## Objective and boundaries
+## Design
 
-A virtualized OpenWrt gateway provides normal LAN DNS, DHCP, Internet routing and domain-aware VPN policy routing. The resilience design uses an existing NAS as an **independent authoritative source for internal names**, rather than relying on forwarding internal queries back to an unavailable gateway.
+An existing NAS provides authoritative internal DNS independently of the virtualized gateway. An operations host copies explicit static A mappings from gateway configuration to two NAS authoritative zones using RFC 2136 updates authenticated with a protected TSIG key. The NAS forwards other DNS queries exclusively to the gateway, with a single upstream and Forward only policy; Internet access remains dependent on the gateway.
 
-- The NAS is **not** a substitute for routing: Internet access still depends on the gateway.
-- Public recursive resolution must continue through the primary gateway only, with **Forward only** policy and no direct public fallback; this preserves the selected domain-based routing path, subject to testing of resolver caching.
-- A second DHCP service is planned to operate simultaneously with the gateway using **non-overlapping IPv4 address pools**. This is not synchronized DHCP failover, nor a guaranteed 50/50 distribution of clients.
+Two IPv4 DHCP servers are simultaneously enabled on one LAN, using **non-overlapping pools**. They do not exchange leases, coordinate failover, or guarantee proportional client assignment.
 
-## Progress verified on 6 November
+## Verified on 6 November 2026
 
-1. Native DNS Server package installed on the NAS; gateway-only forwarding configured.
-2. An **authoritative primary forward-lookup zone for the internal domain was created**.
-3. An initial resource record appeared in the management UI but direct DNS queries returned `NXDOMAIN` even though the server answered authoritatively.
-4. Exported zone data had a newer SOA serial than the currently served zone. A misconfigured NS record (attached to an individual name rather than the zone apex) was corrected.
-5. **Direct query validation succeeded:** the served SOA advanced to serial 5 and the initial NAS hostname resolved to the expected internal address from the alternate DNS server.
+1. **Two authoritative zones:** primary internal and local service-name override zones were created. Correcting an incorrectly placed zone-apex NS resolved initial authoritative NXDOMAIN responses. Direct SOA and A queries subsequently succeeded.
+2. **Live DNS synchronization:** 33 explicit static A mappings were read from the gateway over SSH: 26 in the internal zone and seven in the service-override zone. The first dry-run proposed 32 additions and preserved one existing record. A TSIG-authenticated apply reported **25 + 7 verified updates**. A repeat dry-run returned **zero changes**.
+3. **Automation deployed:** the sync script, protected key and state configuration are installed on the operations host. Its systemd service and timer are enabled with a daily 03:30 schedule, five-minute random delay, boot offset, and persistent catch-up behavior. **No unattended timed execution has yet been observed.**
+4. **Resolver tests:** direct NAS queries succeeded for an internal name, a locally overridden service name, and an unrelated external domain. Settings confirmed gateway-only forwarding and Forward only policy.
+5. **DHCP deployment:** the gateway retained its original 50-address pool and the NAS enabled a separate 20-address pool. The gateway's generated DHCP configuration includes both DNS servers in option 6; an actual Windows gateway-leased client displays both resolvers and the correct gateway.
+6. **PBR smoke test:** after a DNS query sent to the NAS for a domain with a dedicated gateway policy-routing rule, the gateway nftset contained the IP returned by the NAS. This is observed matching state, not proof that cache hits always refresh policy sets.
 
-This verifies **one record in one local zone**, not the full internal record set, automated replication, client resolver behavior or survivability during an outage.
+## Known limitations and outstanding validation
 
-## Record synchronization — prepared, not installed
+- **No NAS DHCP lease observed:** activation and disjoint pool configuration are confirmed, but a client lease issued by the second server has not yet been captured.
+- **Possible static-IP collision:** probing the proposed NAS range found no ARP/ICMP respondents, but a powered-off device may have an address in that range. Verify or move it before powering it on.
+- **Cache vs. policy routing:** the NAS DNS cache may answer without querying gateway dnsmasq; after a PBR restart, some destination nftsets could be stale. Test this separately.
+- **Authoritative override trade-off:** the local override zone masks public MX/TXT/apex and other names not represented locally. This limitation is accepted for the current service use case, not a generally complete public DNS mirror.
+- **Record scope:** only explicitly configured static A records are synchronized, not lease-derived names, AAAA, CNAME, MX, TXT, PTR or full zone transfers.
+- **IPv6:** DHCPv6/router advertisements remain on the gateway; end-to-end IPv6 DNS/RA checks have not been completed.
+- **Outage:** direct authoritative lookup has been tested while the gateway was available; controlled gateway-down resilience, recovery timings and actual redundant-DHCP behavior have **not** been tested.
 
-The next phase uses a separate operations host to:
+## Evidence matrix
 
-- Read explicit static DNS A mappings from the gateway over SSH.
-- Compare the desired entries with authoritative responses from the NAS.
-- Use authenticated RFC 2136/TSIG dynamic DNS updates, rather than editing the NAS's internal zone files.
-- Preserve SOA/NS records and manually managed records; apply guarded additions, changes, and removals only for previously script-managed names.
-- Run a dry-run first, then enable a daily systemd timer after live tests.
-
-A first implementation package has been prepared **privately**. It has **not** been installed on the operations host, authenticated against the NAS, or exercised in a live update. A second authoritative zone for selected public-looking internal service names still needs creation and its behavior needs careful review: making an entire public domain authoritative locally may hide unrelated public records. Only static A records are within the initial sync scope; DHCP lease-derived hostnames and other record types need separate treatment.
-
-## DHCP and cutover are still pending
-
-- Inspect current DHCP pools, reservations and active leases before selecting the NAS range.
-- Test consistency of router, DNS, search-domain and lease options, including IPv6 RA/RDNSS if applicable.
-- Check VPN policy routing with responses forwarded via the gateway and served from the NAS cache; caching can affect domain-derived routing sets.
-- Validate both DNS servers individually before advertising the alternate DNS to clients.
-- Validate failure and recovery separately, without treating DNS lookup success as proof that Internet routing is available.
-
-## Evidence levels
-
-| Capability | Status |
+| Capability | Evidence |
 |---|---|
-| NAS DNS application and internal primary zone | **Configured** |
-| One internal A record resolving via direct query | **Verified** |
-| Complete internal/static split-DNS records | **Not yet synchronized** |
-| Periodic authenticated update script | **Prepared, not deployed** |
-| Additional authoritative service-name zone | **Not yet created** |
-| Alternate DNS distributed via DHCP | **Not deployed** |
-| Second active DHCP with non-overlapping pool | **Design agreed, not enabled** |
-| Gateway-down DNS continuity and VPN policy behavior | **Not tested** |
+| Two NAS authoritative zones | Direct SOA/A queries verified |
+| Authenticated static A sync | 32 live updates verified; one existing record preserved |
+| Idempotence | Repeat dry-run: zero modifications |
+| Scheduled sync | Timer installed/enabled; unattended run pending |
+| Gateway-only external forwarder | Configuration screenshot; external resolution succeeded |
+| Dual DNS advertisement | Generated dnsmasq config and Windows client verified |
+| Simultaneous disjoint DHCPv4 | Both services enabled; NAS-issued lease pending |
+| Domain-aware PBR test | NAS-served IP observed in matching gateway nftset |
+| Cache recovery and outage testing | Outstanding |
 
-This public document intentionally excludes names, addresses, device identifiers, source configurations and key material.
+**Publication boundary:** no production endpoints, hostnames, domain names, secrets, private keys, or precise routing definitions are included.
