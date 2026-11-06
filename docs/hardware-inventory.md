@@ -11,7 +11,7 @@ A maintainable Home Lab benefits from a per-host inventory with evidence levels.
 | Virtualization nodes | Two midrange Intel desktop CPU nodes, each with 16 GB RAM, plus a low-power four-port mini-PC with about 8 GB RAM | Motherboards, disk mapping, link dependencies, power |
 | ZFS NAS | Three reused desktop-class platforms, approximately 16 GB RAM each; different RAIDZ/mirror/replication roles | Current drive inventory, resilver and SMART completion, slot mapping |
 | Commercial NAS | Existing two-bay appliance used for shared storage and alternate DNS | Storage health and dependency sequencing |
-| **Backup server** | **Dell Wyse 5070 Thin Client; 4-core low-power Celeron, 8 GB RAM; 32 GB-class SATA flash system disk and separate 32 GB-class eMMC; Gigabit Ethernet and integrated Wi-Fi controller** | Physical module details, network negotiated speed, flash wear |
+| **Backup server** | **Reused compact thin-client platform; 4-core low-power Intel CPU, 8 GB RAM; SATA flash system disk and separate onboard eMMC; Gigabit Ethernet and integrated Wi-Fi controller** | Physical module details, network negotiated speed, flash wear |
 | VPS | Two externally hosted virtual instances | Virtual quotas and independent recovery controls |
 | Access/network | LAN switches, selected independent cluster-storage links, wireless mesh | Cable/port and power-failure map |
 
