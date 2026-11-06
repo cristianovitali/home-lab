@@ -1,6 +1,6 @@
 # Public validation log
 
-Updated: **5 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
+Updated: **6 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
 
 | Area | Current claim | Verification level |
 |---|---|---|
@@ -14,8 +14,9 @@ Updated: **5 November 2026**. Public evidence is summarized rather than posting 
 | DNS/TLS additional templates | Prepared privately for later deployment | **Not deployed** |
 | Zabbix email transport and action | Media enabled; direct email test reached recipient; email trigger action saved | **Transport tested / action configured**, real event and recovery delivery outstanding |
 | Zabbix push webhook and action | Media enabled and direct webhook test reached recipient; secret reference configured; critical-only action and recipient linkage pending | **Transport tested**, automatic alerting not deployed |
-| Alternate local DNS resolver | NAS DNS service installed with gateway-only forwarding; local authoritative zone and synchronization incomplete | **Partial configuration**, resilience not tested |
-| Parallel DHCP option | Separate address pools proposed; no client DHCP changes | **Design only** |
+| Alternate local DNS resolver | Authoritative internal zone loaded; initial A record verified with direct query after NS correction; full synchronization and outage test pending | **Single-record DNS lookup measured**, resilience not tested |
+| Parallel DHCP option | Two simultaneously active DHCP servers with disjoint pools agreed; no second DHCP enabled and no client DHCP changes | **Design agreed, not deployed** |
+| Local backup host rescue flash | Separate onboard eMMC formatted, mounted and root-only backup directory created; automated local copies not yet scheduled | **Storage prepared**, backup/restore untested |
 | Disaster recovery | Runbooks and backup copies available | **Recovery exercise outstanding** |
 
 ## Evidence conventions
