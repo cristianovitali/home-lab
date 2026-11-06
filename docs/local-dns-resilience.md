@@ -1,41 +1,56 @@
-# Local DNS and DHCP resilience — design note
+# Local DNS and DHCP resilience — implementation status
 
-**Updated:** 5 November 2026. **Status:** partial configuration; not deployed to client devices.
+**Updated:** 6 November 2026. **Evidence:** operator-supplied configuration and direct DNS query results. **Client rollout:** not performed.
 
-## Why this matters
+## Objective and boundaries
 
-A virtualized gateway can become unavailable after a power event or while its dependent storage initializes. When the same gateway provides routing, DHCP and the only DNS resolver, one startup failure affects multiple services. The recovery sequence therefore matters as much as an individual service's uptime.
+A virtualized OpenWrt gateway provides normal LAN DNS, DHCP, Internet routing and domain-aware VPN policy routing. The resilience design uses an existing NAS as an **independent authoritative source for internal names**, rather than relying on forwarding internal queries back to an unavailable gateway.
 
-## Proposed roles
+- The NAS is **not** a substitute for routing: Internet access still depends on the gateway.
+- Public recursive resolution must continue through the primary gateway only, with **Forward only** policy and no direct public fallback; this preserves the selected domain-based routing path, subject to testing of resolver caching.
+- A second DHCP service is planned to operate simultaneously with the gateway using **non-overlapping IPv4 address pools**. This is not synchronized DHCP failover, nor a guaranteed 50/50 distribution of clients.
 
-- **Primary resolver and gateway:** OpenWrt remains responsible for normal DNS forwarding, LAN routing and domain-sensitive VPN policies.
-- **Alternative resolver:** a DNS service on an existing Synology NAS provides a locally held copy of essential internal names. This is not a new VM or an additional public DNS service.
-- **Optional additional DHCP server:** a separate, future phase with non-overlapping pools, consistent DHCP options and a controlled migration/validation plan.
+## Progress verified on 6 November
 
-### Why a local zone copy is necessary
+1. Native DNS Server package installed on the NAS; gateway-only forwarding configured.
+2. An **authoritative primary forward-lookup zone for the internal domain was created**.
+3. An initial resource record appeared in the management UI but direct DNS queries returned `NXDOMAIN` even though the server answered authoritatively.
+4. Exported zone data had a newer SOA serial than the currently served zone. A misconfigured NS record (attached to an individual name rather than the zone apex) was corrected.
+5. **Direct query validation succeeded:** the served SOA advanced to serial 5 and the initial NAS hostname resolved to the expected internal address from the alternate DNS server.
 
-The gateway's lightweight DNS service does not automatically offer conventional authoritative zone transfer to the NAS. A forwarding-only domain pointing back to the gateway would fail with it. The alternative resolver therefore needs local authoritative records, plus a maintained synchronization mechanism. This is **not** proof of working DNS slave-zone replication.
+This verifies **one record in one local zone**, not the full internal record set, automated replication, client resolver behavior or survivability during an outage.
 
-A single upstream forwarder and **Forward only** policy were selected to retain the gateway as the required path for external lookups. The local names may continue to work if the primary DNS disappears, but external lookup and Internet connectivity may still fail.
+## Record synchronization — prepared, not installed
 
-## Important boundaries
+The next phase uses a separate operations host to:
 
-1. **DNS is not a gateway replacement.** With the only router unavailable, an alternative DNS server cannot restore Internet routing.
-2. **DNS caching can affect domain-based VPN policy routing.** A cached answer on the alternative resolver may not update the gateway's DNS-derived policy sets. This behavior requires actual testing before serving clients.
-3. **Two DHCP servers do not constitute a synchronized HA pair.** Their pools must not overlap, and leases/options need explicit verification.
-4. **Local resolution and split-horizon responses must agree.** An out-of-date copy can create misleading success signals and break internal application routing.
-5. **Startup dependencies remain:** the NAS itself supplies storage to selected infrastructure workloads.
+- Read explicit static DNS A mappings from the gateway over SSH.
+- Compare the desired entries with authoritative responses from the NAS.
+- Use authenticated RFC 2136/TSIG dynamic DNS updates, rather than editing the NAS's internal zone files.
+- Preserve SOA/NS records and manually managed records; apply guarded additions, changes, and removals only for previously script-managed names.
+- Run a dry-run first, then enable a daily systemd timer after live tests.
 
-## Evidence snapshot
+A first implementation package has been prepared **privately**. It has **not** been installed on the operations host, authenticated against the NAS, or exercised in a live update. A second authoritative zone for selected public-looking internal service names still needs creation and its behavior needs careful review: making an entire public domain authoritative locally may hide unrelated public records. Only static A records are within the initial sync scope; DHCP lease-derived hostnames and other record types need separate treatment.
 
-| Capability | State at last operator confirmation |
+## DHCP and cutover are still pending
+
+- Inspect current DHCP pools, reservations and active leases before selecting the NAS range.
+- Test consistency of router, DNS, search-domain and lease options, including IPv6 RA/RDNSS if applicable.
+- Check VPN policy routing with responses forwarded via the gateway and served from the NAS cache; caching can affect domain-derived routing sets.
+- Validate both DNS servers individually before advertising the alternate DNS to clients.
+- Validate failure and recovery separately, without treating DNS lookup success as proof that Internet routing is available.
+
+## Evidence levels
+
+| Capability | Status |
 |---|---|
-| NAS DNS service installed | Confirmed |
-| External forwarding directed only to the gateway | Configured and saved |
-| Local authoritative zone populated | Not yet confirmed |
-| Automated record synchronization | Not implemented |
-| DNS advertised to client devices | Not changed |
-| Second DHCP server | Proposed, not configured |
-| Failure-mode and VPN-policy validation | Pending |
+| NAS DNS application and internal primary zone | **Configured** |
+| One internal A record resolving via direct query | **Verified** |
+| Complete internal/static split-DNS records | **Not yet synchronized** |
+| Periodic authenticated update script | **Prepared, not deployed** |
+| Additional authoritative service-name zone | **Not yet created** |
+| Alternate DNS distributed via DHCP | **Not deployed** |
+| Second active DHCP with non-overlapping pool | **Design agreed, not enabled** |
+| Gateway-down DNS continuity and VPN policy behavior | **Not tested** |
 
-The next milestone is to build and validate the NAS's local DNS zone **without** changing client DHCP or relying on public fallback resolvers. This design note deliberately omits private names, addresses, routes, credentials and exports.
+This public document intentionally excludes names, addresses, device identifiers, source configurations and key material.
