@@ -1,6 +1,6 @@
 # Layered monitoring and alerting
 
-Updated: **5 November 2026** — public, sanitized overview.
+Updated: **6 November 2026** — public, sanitized overview.
 
 ## Design
 
@@ -15,7 +15,7 @@ Zabbix 7.0 LTS is the central monitoring system. Collection techniques are chose
 | NAS and ZFS infrastructure | SNMPv3 templates | Three NAS nodes of one type and another NAS node configured; early checks observed no unsupported items on the three-node subset |
 | Proxmox Backup Server | HTTP API template and monitored jobs | API integration and datastore status accessible; selected alerts and freshness checks require follow-through |
 | Certificates and DNS | Prepared Agent 2 items / split-horizon probes | Designed and privately staged; **not imported** into production yet |
-| Alert delivery | Existing job notifications plus Zabbix email and push webhook | Direct email test received, email trigger action saved; direct push webhook test received, but its filtered trigger action and recipient linkage are not yet configured. No real-trigger delivery evidence yet |
+| Alert delivery | Existing job notifications plus Zabbix email and push webhook | Real Zabbix email alerts received during storage maintenance: host-down, host-up/recovery and degraded-pool notifications. Push webhook test succeeded, but filtered action/recipient linkage remains pending |
 
 ## Service health versus host reachability
 
@@ -41,4 +41,4 @@ All six application hosts had their three ICMP checks supported and returned UP.
 
 ## Next steps
 
-Complete recipient/filtered-action configuration for critical push alerts without changing the existing email action; validate real-trigger delivery and recovery messages without causing production outages. Separately, import and validate DNS/TLS monitoring templates. A NAS alternative DNS resolver is being configured, but its independent local-zone answers and compatibility with domain-based VPN policy routing require testing before it becomes a client DNS option. See [DNS resilience design](local-dns-resilience.md). Finally add service levels and dashboards using measured application health.
+Real-event email problem and recovery delivery has been confirmed for host availability and storage-degradation events. Keep the existing email action intact; complete recipient/filtered-action configuration for critical push alerts, then validate the push path without causing production outages. Separately, import and validate DNS/TLS monitoring templates. A NAS alternative DNS resolver is being configured, but its independent local-zone answers and compatibility with domain-based VPN policy routing require testing before it becomes a client DNS option. See [DNS resilience design](local-dns-resilience.md). Finally add service levels and dashboards using measured application health.
