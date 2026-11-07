@@ -1,6 +1,6 @@
 # Public engineering roadmap
 
-Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
+Updated: **7 November 2026**. This is a **sanitized engineering roadmap** for a running Home Lab; it intentionally omits the topology, identities and access details of the live environment.
 
 ## Completed and evidenced
 
@@ -12,6 +12,7 @@ Updated: **6 November 2026**. This is a **sanitized engineering roadmap** for a 
 - **Storage monitoring:** SNMPv3 integrations for three TrueNAS servers and one Synology NAS; API-based Proxmox and PBS monitoring. Some individual storage metrics remain to be validated.
 - **Documentation-as-code:** a separate private operational repository plus this sanitized public engineering portfolio; initial read-only Ansible playbooks and reusable notification patterns published.
 - **Per-host hardware inventory started:** CPU/RAM/storage/network fields recorded with evidence levels; the dedicated backup server's hardware and separate local rescue eMMC are now confirmed. Two-drive NAS replacement resilver completion is still pending. [Hardware methodology and field note](hardware-inventory.md).
+- **Nonblocking VM start recovery configured (7 November):** a separate systemd service was enabled on the utility virtualization host to retry startup of three NAS-backed production guests when their shared storage is detected as active. Default guest autostart was disabled for those guests, leaving them running during configuration. The host's normal startup and iSCSI configuration were not altered. The service completed one no-op test successfully while all guests were already running; **delayed NAS readiness and real restart recovery remain untested**. Future cluster HA will require redesign/removal of the local retry service.
 
 ## In progress / next
 
