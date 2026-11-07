@@ -14,14 +14,20 @@ Updated: **7 November 2026**. This is a **sanitized engineering roadmap** for a 
 - **Per-host hardware inventory started:** CPU/RAM/storage/network fields recorded with evidence levels; the dedicated backup server's hardware and separate local rescue eMMC are now confirmed. Two-drive NAS replacement resilver completion is still pending. [Hardware methodology and field note](hardware-inventory.md).
 - **Nonblocking VM start recovery configured (7 November):** a separate systemd service was enabled on the utility virtualization host to retry startup of three NAS-backed production guests when their shared storage is detected as active. Default guest autostart was disabled for those guests, leaving them running during configuration. The host's normal startup and iSCSI configuration were not altered. The service completed one no-op test successfully while all guests were already running; **delayed NAS readiness and real restart recovery remain untested**. Future cluster HA will require redesign/removal of the local retry service.
 
-## In progress / next
+## Newly configured and observed — 7 November 2026
 
-1. **Alert quality and delivery:** real Zabbix email alerts for host DOWN/UP and degraded storage pool were received during actual disk replacement on 6 November (**problem/recovery email delivery validated for those events**). Finish the separate critical-only ntfy route, trigger dependencies and broader coverage; do not disturb the working email action or deliberately fail backups.
-2. **DNS resilience and TLS checks:** two NAS authoritative zones hold 33 static A mappings; an authenticated apply verified 32 updates and the repeat dry-run showed zero changes. A daily systemd sync timer is enabled. Two DHCPv4 pools are active and disjoint; a Windows gateway-leased client confirmed advertisement of both DNS resolvers. Direct DNS queries and a domain-routing nftset smoke test succeeded. **Pending:** first NAS DHCP lease, unattended timer confirmation, DNS cache/PBR restart behavior, gateway outage test and staged DNS/TLS monitoring templates. See [DNS resilience](local-dns-resilience.md).
-3. **Backup freshness and storage diagnostics:** verify PBS job results and datastore health, ZFS pool alerts, SMART temperatures, and stale replication detection. On the low-power PBS host, prepare periodic configuration rescue archives on the newly initialized secondary flash device; the storage is mounted but no new archive job is active. Keep existing job notifications intact.
-4. **Failure dependency model:** suppress derivative application incidents when an upstream network, DNS, storage or virtualization dependency is unavailable.
-5. **Monitoring service levels:** define application-level availability objectives and measure rolling historical periods; distinguish reachable host, correct HTTP response and verified application transaction.
-6. **Operational dashboards:** aggregate meaningful network, backup, cluster, and application states while avoiding noisy or misleading green statuses.
+- **Emergency notification route:** a separate HTTPS push action was configured with Problem and Recovery operations. Its current policy is unsuppressed High/Disaster triggers, without per-trigger opt-in tags, during a two-week observation trial. Delivery through the webhook's standalone test has been confirmed; **automatic end-to-end delivery through a real trigger is not yet verified**. Existing email alerting is preserved.
+- **Backup capacity alert:** the existing backup-server datastore usage warning threshold was changed from 90% to **80%** through a host-level override. The action remains at a non-emergency severity, to avoid duplicating high-priority push notifications. Native failure alerts remain in charge of backup and replication job failures. Detailed per-workload freshness monitoring was deliberately deferred.
+- **Application reliability measurement:** six application services are now represented as Zabbix Services linked to existing HTTP health-check triggers. One monthly 24/7 SLA measures their service-level indicators; its 99% SLO is a **reporting reference rather than a contractual availability objective**. During an actual service-unresponsive incident, the operator observed the measured availability indicator change. This validates responsiveness to one real outage, not a comprehensive uptime audit.
+- **Operational dashboard:** a map of monitored infrastructure with dynamic problem highlighting has been incorporated into an existing operational dashboard alongside CPU, memory, and NAS disk-temperature charts. Graph time ranges were normalized to the **last 24 hours**. Elevated NAS memory occupancy is mostly attributable to ZFS ARC cache in the observed setup, rather than proving RAM pressure. **No unsanitized production map or dashboard is published.**
+
+## Observation / validation focus
+
+1. **Two-week alert observation (7–21 November):** examine event relevance, duplicates and missed notifications before introducing new trigger tags, exclusions or dependency rules. Do not claim the push action is end-to-end verified before a real event is seen.
+2. **Measure observed application availability over time:** retain monthly 24/7 reports, describe internal-probe blind spots during site-wide outages, and decide later whether to publish aggregated sanitized results.
+3. **Test delayed storage availability on a real restart:** verify that an independent VM startup retry correctly recovers storage-backed guests without delaying host startup; a successful no-op test while guests run is not proof of delayed-start recovery.
+4. **Check existing resilience tasks opportunistically:** restored-backup exercises, standby workloads, storage replacements and periodic configuration backups continue in their own workstreams. No unnecessary new backup monitoring scripts.
+5. **Power-loss resilience:** a future UPS and graceful coordinated shutdown/restart plan remains a priority, **not yet deployed**. No artificial blackout test is requested.
 
 ## Planned validation / resilience work
 
@@ -33,7 +39,7 @@ Updated: **7 November 2026**. This is a **sanitized engineering roadmap** for a 
 
 ## Research backlog (not deployed)
 
-- Observe a client lease actually issued by the enabled NAS DHCP server; check gateway/DNS parameters, resolve potential powered-off static-IP conflicts, and validate DNS/PBR cache and gateway outage behavior.
+- Record a documented end-to-end DHCP lease and DNS/PBR behavior under gateway outage if needed; operator reports DHCP/IP checks already performed, but no detailed lease transcript is included in the public evidence.
 - Additional security telemetry such as host intrusion monitoring.
 - Improved Home Assistant controls, IoT integrations and emergency VPS management.
 - Codec modernization and media-library quality reporting.
