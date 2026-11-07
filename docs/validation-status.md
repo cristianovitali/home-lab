@@ -1,6 +1,6 @@
 # Public validation log
 
-Updated: **6 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
+Updated: **7 November 2026**. Public evidence is summarized rather than posting original command output, private topology or credentials.
 
 | Area | Current claim | Verification level |
 |---|---|---|
@@ -15,8 +15,9 @@ Updated: **6 November 2026**. Public evidence is summarized rather than posting 
 | Zabbix email transport and action | Operator received real host-down, host-up/recovery and degraded-pool alert emails during physical disk maintenance on 6 November | **Real-event problem/recovery notification delivery confirmed** for observed event types; not all triggers tested |
 | Zabbix push webhook and action | Media enabled and direct webhook test reached recipient; secret reference configured; critical-only action and recipient linkage pending | **Transport tested**, automatic alerting not deployed |
 | Alternate local DNS resolver | Two authoritative zones, 33 static A mappings; 32 live updates and zero-change repeat dry-run; timer enabled; local, override and external lookups successful | **Sync and queries verified**; first unattended timer run and outage validation pending |
-| Parallel DHCP option | Gateway and NAS DHCPv4 enabled with disjoint pools; gateway option 6 advertises both resolvers, confirmed on an actual Windows client | **Gateway client configuration verified**; NAS-issued lease not yet observed |
+| Parallel DHCP option | Gateway and NAS DHCPv4 enabled with disjoint pools; gateway option 6 advertises both resolvers, confirmed on a Windows client; operator later reported DHCP and static-IP checks complete | **Gateway client config measured; NAS DHCP verification operator-reported**, no second-server lease transcript retained |
 | Local backup host rescue flash | Separate onboard eMMC formatted, mounted and root-only backup directory created; automated local copies not yet scheduled | **Storage prepared**, backup/restore untested |
+| NAS-backed VM delayed-boot retry | Separate nonblocking systemd retry enabled; three production VMs have standard onboot disabled, remained running; manual service start terminated successfully with all VMs already up | **Configuration and no-op test verified**; delayed storage, host reboot and true recovery not exercised |
 | Disaster recovery | Runbooks and backup copies available | **Recovery exercise outstanding** |
 
 ## Evidence conventions
