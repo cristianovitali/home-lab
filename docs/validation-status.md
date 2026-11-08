@@ -24,7 +24,7 @@ Updated: **8 November 2026**. Public evidence is summarized rather than posting 
 | Infrastructure map/dashboard | Nineteen monitored elements shown on a linked logical infrastructure map, charting compute, memory and NAS disk temperatures with 24-hour aligned times | **Operator screenshot / visual verification**; sanitized production evidence not published |
 | Power-loss graceful shutdown | UPS and coordinated system shutdown identified as future investment and runbook topic | **Planned, not deployed** |
 | Disaster recovery | Runbooks and backup copies available | **Recovery exercise outstanding** |
-| VPS container patching and proxy recovery (8 Nov) | System and application image updates completed; a reverse proxy initially failed on reboot because its VPN container network namespace was not ready, then was restored manually; one-shot systemd retry enabled | **Host reboot and manual recovery observed**; retry unit ran successfully while proxy already up; automatic next-reboot recovery, endpoint checks and rescanned CVEs outstanding |
+| VPS container patching and proxy recovery (8 Nov) | Ubuntu, reverse-proxy and notifications images, and container runtime upgraded. Proxy initially failed on host reboot due to a network-namespace startup race, recovered manually; one-shot systemd retry enabled. Operator subsequently switched to the upgraded VPS VPN and confirmed working traffic | **Host reboot, manual proxy recovery, and real post-upgrade VPN connectivity operator-confirmed**; automatic recovery on the next reboot, endpoint-by-endpoint checks and rescanned CVEs outstanding |
 
 ## Evidence conventions
 
