@@ -54,6 +54,7 @@ This is a living operational environment. The architecture document distinguishe
 - [ADR: Recovery-first protection](docs/adr/0002-backup-and-restore.md)
 - [Runbook: Backup failure triage](docs/runbooks/backup-failure-triage.md)
 - [Runbook: Power-event recovery](docs/runbooks/power-event-recovery.md)
+- [Runbook: Reverse proxy startup after Docker VPN namespace race](docs/runbooks/docker-shared-network-boot-order.md) — failure analysis, recovery and retry unit with explicit validation limits
 - [Ansible reference playbooks](automation/ansible/README.md) — six reviewed examples, sample inventory and reboot diagnostic task
 - [Sanitized Python operational scripts](automation/scripts/README.md) — systemd failure and reboot-required reports
 
