@@ -91,6 +91,15 @@ nft list set inet manual_bans blocked_ipv4
 
 Repeat on each VPS for symmetrical policies; independently verify both files and live sets. If a set or chain is missing, diagnose before running create commands, as other firewall services may have changed the ruleset.
 
+
+## Optional bulk-add helper (reference implementation)
+
+The repository also contains [`homelab-ban-ip.sh`](../../automation/scripts/homelab-ban-ip.sh). Once installed, it accepts exactly one public IPv4 address or a text file with one address per line (blank lines and `#` comments are accepted). It checks input before changes, avoids duplicates, and updates both the in-memory nft set and the persistent file without restarting Docker or the VPN. It only adds addresses: removal remains a deliberate manual operation.
+
+**Important:** the helper targets the **private implementation names** `/etc/nftables.d/homelab-manual-bans.nft`, `inet homelab_manual_bans` and `blocked_ipv4`. The sanitized `manual_bans` example earlier in this runbook is **not** directly compatible without adjusting the script constants or adopting the private table/file names. The helper requires root, Python 3 and `nft`, and fails if the set is not already active. It accepts individual public IPv4 addresses only (no CIDR/IPv6); tests used a mocked nft tool, not yet a live server.
+
+Automatic feed creation from CrowdSec is **not deployed**: eligibility criteria, false-positive handling, expiry/review rules and a manual approval step must be agreed before generating a file for permanent blocking.
+
 ## Validate
 
 - Confirm the file and in-memory set contain exactly the intended addresses.
